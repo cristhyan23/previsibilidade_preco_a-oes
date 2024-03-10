@@ -23,8 +23,8 @@ class AnalisisStock(AddPriceCompare):
         self.epochs_database = 30
         self.dias_base_estudo = 5000
         self.filter_params = {
-    'scale_factor': 0.8,  # Fator de escala para o segundo dia
-    'max_percent_change': 2,  # Variação percentual máxima permitida entre os preços previstos
+    'scale_factor': 0.5,  # Fator de escala para o segundo dia
+    'max_percent_change': 1,  # Variação percentual máxima permitida entre os preços previstos
     'adjustment_factor': 0.03  # Fator de ajuste para a previsão anterior em caso de variação percentual alta
 }
     # Função para substituir ou remover caracteres não suportados
