@@ -132,7 +132,7 @@ class AnalisisStock(AddPriceCompare):
                
                 #guarda as previsões e projeções das ações
                 self.result_dict.update({
-                    "stocks": {acoes_cleaned: {
+                    acoes_cleaned: {
                         "predictions_1": predictions[0],
                         "predictions_2": predictions[1],
                         "predictions_3": predictions[2],
@@ -142,8 +142,7 @@ class AnalisisStock(AddPriceCompare):
                         "predictions_7": predictions[6],
                         "growth_index": growth_index,
                         "analisis r2":analisis_r2
-                    }}
-                })
+                    }})
 
             #aponta qual erro que ocorreu na ação e salta para a próxima
             except Exception as e:
