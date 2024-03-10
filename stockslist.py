@@ -92,9 +92,7 @@ class Stocklist:
     "PETR3",
     "PETR4"
 ]
-        self.cripto = [
-            'BTC-USD', 
-                       'ETH-USD', 'USDT-USD', 'BNB-USD', 'USDC-USD', 'XRP-USD', 'SOL1-USD', 'DOT1-USD', 'DOGE-USD', 'AVAX-USD']
+        self.cripto = ['BTC-USD','ETH-USD', 'USDT-USD', 'BNB-USD', 'USDC-USD', 'XRP-USD', 'SOL1-USD', 'DOT1-USD', 'DOGE-USD', 'AVAX-USD']
     
     
     def get_list_stocks(self):
