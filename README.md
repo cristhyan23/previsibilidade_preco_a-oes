@@ -41,3 +41,4 @@ Para utilizar este projeto:
 - A previsão de preços de ações e Cripto é inerentemente incerta e influenciada por vários fatores. Os resultados podem nem sempre ser precisos ou confiáveis.
 - É recomendável consultar especialistas financeiros antes de tomar qualquer decisão de investimento com base nas previsões geradas por este projeto.
 - Ao selecionar Cripto, a moeda será mostrada em USD; se selecionar ações, a moeda será em BRL.
+- A variavel na classe AnalisisStock chamada filter_params contem os parametros de caliberam para as previsões de 7 dias à frente focando otimizar e encontrar resultados mais alinhados a curva, os mesmos devem ser ajustados de acordo com a análise feita
