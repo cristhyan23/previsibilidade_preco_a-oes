@@ -92,11 +92,33 @@ class Stocklist:
     "PETR3",
     "PETR4"
 ]
-
+        self.cripto = [
+            'BTC-USD', 
+                       'ETH-USD', 'USDT-USD', 'BNB-USD', 'USDC-USD', 'XRP-USD', 'SOL1-USD', 'DOT1-USD', 'DOGE-USD', 'AVAX-USD']
+    
+    
     def get_list_stocks(self):
-        acoes_SA = [acao + ".SA" for acao in self.list_completa_acoes]
-        return acoes_SA
+        inicializado = False
+        while not inicializado:
+            try:
+                analise =  int(input("Qual Analise prefere: 1 =  Amostra de Ações | 2 = Lista Completa Ações Ibovespa | 3 = Criptomoedas (10 principais criptos): "))
+                if analise == 1:
+                    acoes_SA = [acao + ".SA" for acao in self.amostra_acoes]
+                    inicializado = True
+                    return acoes_SA
+                elif analise == 2:
+                    acoes_SA = [acao + ".SA" for acao in self.list_completa_acoes]
+                    inicializado = True
+                    return acoes_SA
+                elif analise == 3:
+                    acoes_SA = [acao + ".SA" for acao in self.cripto]
+                    inicializado = True
+                    return acoes_SA
+                else:
+                    print("Digite somente 1 ou 2")
+            except ValueError:
+                print("Por favo digite somente número!")
 
 
-#    
+    
 

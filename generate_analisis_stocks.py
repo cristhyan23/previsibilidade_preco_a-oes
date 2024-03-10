@@ -7,13 +7,13 @@ from keras.models import Sequential
 from keras.layers import Dense, LSTM, Dropout,InputLayer
 from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
-from stockslist import Stocklist
 from sklearn.metrics import r2_score
 import unicodedata
 import sys
 import codecs
+from analisis_prices import AddPriceCompare
 
-class AnalisisStock(Stocklist):
+class AnalisisStock(AddPriceCompare):
     def __init__(self):
         super().__init__()
         self.scaler = MinMaxScaler(feature_range=(0, 1))
@@ -132,11 +132,17 @@ class AnalisisStock(Stocklist):
                
                 #guarda as previsões e projeções das ações
                 self.result_dict.update({
-                    acoes_cleaned: {
-                        "predictions": predictions,
+                    "stocks": {acoes_cleaned: {
+                        "predictions_1": predictions[0],
+                        "predictions_2": predictions[1],
+                        "predictions_3": predictions[2],
+                        "predictions_4": predictions[3],
+                        "predictions_5": predictions[4],
+                        "predictions_6": predictions[5],
+                        "predictions_7": predictions[6],
                         "growth_index": growth_index,
                         "analisis r2":analisis_r2
-                    }
+                    }}
                 })
 
             #aponta qual erro que ocorreu na ação e salta para a próxima
@@ -155,3 +161,6 @@ class AnalisisStock(Stocklist):
 if __name__ == "__main__":
      analiser = AnalisisStock()
      file = analiser.save_file()
+     #running comparing prices to add into the file
+     analiser.add_last_price()
+     analiser.add_diferences_prediciton_add_last_price()
