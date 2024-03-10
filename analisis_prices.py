@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pandas as pd
 import yfinance as yf
 from stockslist import Stocklist
