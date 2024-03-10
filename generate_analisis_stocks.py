@@ -21,8 +21,12 @@ class AnalisisStock(AddPriceCompare):
         self.look_back = 7
         sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
         self.epochs_database = 30
-        self.dias_base_estudo = 50000
-
+        self.dias_base_estudo = 5000
+        self.filter_params = {
+    'scale_factor': 0.8,  # Fator de escala para o segundo dia
+    'max_percent_change': 2,  # Variação percentual máxima permitida entre os preços previstos
+    'adjustment_factor': 0.03  # Fator de ajuste para a previsão anterior em caso de variação percentual alta
+}
     # Função para substituir ou remover caracteres não suportados
     def sanitize_text(self, text):
         sanitized_text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
@@ -42,16 +46,40 @@ class AnalisisStock(AddPriceCompare):
         return np.array(X), np.array(Y)
 
     # Função para fazer previsões
-    def predict_next_week(self,model, data, days_ahead=7):
+    def predict_next_week(self, model, data, days_ahead=7, filter_params=None):
         prediction = []
         last_sequence = data[-days_ahead:, :]
-        for _ in range(days_ahead):
+        for day in range(days_ahead):
+            # Predição do próximo dia
             scaled_prediction = model.predict(np.array([last_sequence]))[0][0]
+            
+            # Inversão da escala para obter o valor não normalizado
             unscaled_prediction = self.scaler.inverse_transform([[0, 0, 0, scaled_prediction]])[0][3]
+            
+            # Aplicar fator de escala específico para o segundo dia
+            if day == 1 and filter_params:
+                unscaled_prediction *= filter_params.get('scale_factor')
+            
+            # Adicionando previsão à lista de previsões
             prediction.append(unscaled_prediction)
+            
+            # Atualizando a sequência de entrada para o próximo dia
             last_sequence = np.roll(last_sequence, -1, axis=0)
             last_sequence[-1, 3] = unscaled_prediction  # Substituir o último preço de fechamento pelo previsto
+            
+            # Filtragem mais detalhada do próximo dia
+            if filter_params:
+                # Verificar a variação percentual entre os preços previstos para os próximos dias
+                if day >= 2 and len(prediction) >= 2:
+                    percent_change = (prediction[day] - prediction[day - 1]) / prediction[day - 1] * 100
+                    if percent_change > filter_params.get('max_percent_change'):
+                        # Se a variação percentual for muito alta, ajustar a previsão anterior
+                        prediction[day - 1] *= 1 + filter_params.get('adjustment_factor')
+                        # Atualizar a sequência de entrada com a previsão ajustada
+                        last_sequence[day - 1, 3] = prediction[day - 1]
+            
         return prediction
+
 
     #função que prepara o treino e retorna o modelo
     def prepar_training_and_model(self,X,Y):
@@ -129,7 +157,7 @@ class AnalisisStock(AddPriceCompare):
                 analisis_r2 = self.analisis_results_r2(model,X_train,Y_train)
                 # Fazendo previsões para a próxima semana
                 latest_data = data_features_scaled[-self.look_back:, :]
-                predictions = self.predict_next_week(model, latest_data,days_ahead=7)
+                predictions = self.predict_next_week(model, latest_data,days_ahead=7,filter_params=self.filter_params)
                 growth_index = (predictions[-1] / predictions[0] - 1) * 100
                
                 #guarda as previsões e projeções das ações

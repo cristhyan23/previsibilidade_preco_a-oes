@@ -99,7 +99,7 @@ class Stocklist:
         inicializado = False
         while not inicializado:
             try:
-                analise =  int(input("Qual Analise prefere: 1 =  Amostra de Ações | 2 = Lista Completa Ações Ibovespa | 3 = Criptomoedas (10 principais criptos): "))
+                analise =  int(input("Qual Analise prefere: 1 =  Amostra de Ações | 2 = Lista Completa Ações Ibovespa | 3 = Criptomoedas (10 principais criptos) | 4 = Ação Expecífica: "))
                 if analise == 1:
                     acoes_SA = [acao + ".SA" for acao in self.amostra_acoes]
                     inicializado = True
@@ -110,6 +110,13 @@ class Stocklist:
                     return acoes_SA
                 elif analise == 3:
                     acoes_SA = [acao + ".SA" for acao in self.cripto]
+                    inicializado = True
+                    return acoes_SA
+                elif analise == 4:
+                    acoes_SA = []
+                    acoes = str(input("Digite a Ação Desejada! \n favor adicinar .SA no final caso Ação da Ibovespa e digitar tudo maiúsculo (Ex: PETR3.SA) :"))
+                    
+                    acoes_SA.append(acoes)
                     inicializado = True
                     return acoes_SA
                 else:
