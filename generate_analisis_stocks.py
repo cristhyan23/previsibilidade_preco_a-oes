@@ -132,7 +132,7 @@ class AnalisisStock(AddPriceCompare):
                
                 #guarda as previsões e projeções das ações
                 self.result_dict.update({
-                    acoes_cleaned: {
+                        "stocks":acoes_cleaned, 
                         "predictions_1": predictions[0],
                         "predictions_2": predictions[1],
                         "predictions_3": predictions[2],
@@ -142,7 +142,7 @@ class AnalisisStock(AddPriceCompare):
                         "predictions_7": predictions[6],
                         "growth_index": growth_index,
                         "analisis r2":analisis_r2
-                    }})
+                    })
 
             #aponta qual erro que ocorreu na ação e salta para a próxima
             except Exception as e:
@@ -155,11 +155,13 @@ class AnalisisStock(AddPriceCompare):
         df = pd.DataFrame.from_dict(self.generate_analisis(), orient='index')
         # Salvar o DataFrame em um arquivo Excel
         df.to_excel('./predictions.xlsx',  engine='xlsxwriter')
+        #Executar analises de preços no arquivo
+        buscar_ultimo_preco = self.add_last_price()
+        adicionar_analises = self.add_diferences_prediciton_add_last_price()
 
 
 if __name__ == "__main__":
      analiser = AnalisisStock()
      file = analiser.save_file()
-     #running comparing prices to add into the file
-     analiser.add_last_price()
-     analiser.add_diferences_prediciton_add_last_price()
+    
+
