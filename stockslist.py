@@ -113,7 +113,7 @@ class Stocklist:
                     inicializado = True
                     return acoes_SA
                 else:
-                    print("Digite somente 1 ou 2")
+                    print("Digite somente 1 ou 2 ou 3")
             except ValueError:
                 print("Por favo digite somente número!")
 

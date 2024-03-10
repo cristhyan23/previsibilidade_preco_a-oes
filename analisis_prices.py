@@ -6,12 +6,12 @@ from stockslist import Stocklist
 class AddPriceCompare(Stocklist):
     def __init__(self):
         super().__init__()
-        self.df = pd.read_excel("./predictions.xlsx")
-        self.stock_info = self.df["stocks"]   # Ajuste aqui para iterar sobre os valores, não sobre as colunas
+        self.df = pd.read_excel("./predictions.xlsx") 
 #função responsavel por capturar as ações levantar o ultimo preço e salvar no arquivo    
     def add_last_price(self):
+        stock_info = self.df["stocks"]  
         print("starting data analisis...")
-        for stock in self.stock_info:
+        for stock in stock_info:
             try:
                 acao = yf.Ticker(stock)
                 historico_precos = acao.history(period="1d")
@@ -23,13 +23,14 @@ class AddPriceCompare(Stocklist):
             except Exception as e:
                 print(f'Error Ocur: {e}')
                 continue
-        print("generating analisis x last price")
         print("updating the excel file....")
-        self.df.to_excel('./predictions.xlsx',  engine='xlsxwriter')
+        self.df.to_excel('./predictions.xlsx',index=False, engine='xlsxwriter')
 
     # Função para analisar os dados de último preço x a primeira previsão e apontar projeção de queda e aumento
     def add_diferences_prediciton_add_last_price(self):
-        for stock in self.stock_info:
+        print("generating analisis x last price")
+        stock_info = self.df["stocks"] 
+        for stock in stock_info:
             #analise comparativa da primeira previsão x o último preço da bolsa
             prediction_data_1 = self.df['predictions_1']
             last_price = self.df['ultimo_preco']
@@ -60,10 +61,8 @@ class AddPriceCompare(Stocklist):
             price_diferences_7 = (prediction_data_7 / prediction_data_6 - 1) *100
             self.df.loc[self.df['stocks'] == stock, 'delta_6_prediction_vs_7_prediction'] = price_diferences_7
         #salva o novo dataframe com os valores de previsões
-        self.df.to_excel('./predictions.xlsx',  engine='xlsxwriter')
+        print("final file updating....")
+        self.df.to_excel('./predictions.xlsx',index=False, engine='xlsxwriter')
 
-if __name__ == "__main__":
-    prices_analisis = AddPriceCompare()
-    prices_analisis.add_last_price()
-    prices_analisis.add_diferences_prediciton_add_last_price()
+
     

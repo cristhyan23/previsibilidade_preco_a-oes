@@ -17,11 +17,11 @@ class AnalisisStock(AddPriceCompare):
     def __init__(self):
         super().__init__()
         self.scaler = MinMaxScaler(feature_range=(0, 1))
-        self.result_dict = {}
+        self.data_list = []
         self.look_back = 7
         sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
         self.epochs_database = 30
-        self.dias_base_estudo = 5000
+        self.dias_base_estudo = 50000
 
     # Função para substituir ou remover caracteres não suportados
     def sanitize_text(self, text):
@@ -114,7 +114,9 @@ class AnalisisStock(AddPriceCompare):
         list_acoes = self.get_list_stocks()
         #executa previsbildiade com o estudo de modelo em cada ação
         for acoes in list_acoes:
+            
             acoes_cleaned = self.sanitize_text(acoes)
+            print(f'iniciating analisis: {acoes_cleaned}')
             try:
                 data = self.get_stock(acoes)
                 # Convertendo dataframe para array numpy
@@ -131,8 +133,9 @@ class AnalisisStock(AddPriceCompare):
                 growth_index = (predictions[-1] / predictions[0] - 1) * 100
                
                 #guarda as previsões e projeções das ações
-                self.result_dict.update({
-                        "stocks":acoes_cleaned, 
+                print(f'saving data: {acoes_cleaned}')
+                result_dict = {
+                        "stocks": acoes_cleaned, 
                         "predictions_1": predictions[0],
                         "predictions_2": predictions[1],
                         "predictions_3": predictions[2],
@@ -142,19 +145,21 @@ class AnalisisStock(AddPriceCompare):
                         "predictions_7": predictions[6],
                         "growth_index": growth_index,
                         "analisis r2":analisis_r2
-                    })
+                    }
+                
+                self.data_list.append(result_dict)
 
             #aponta qual erro que ocorreu na ação e salta para a próxima
             except Exception as e:
                     print(f"Error occurred for {self.sanitize_text(acoes)}: {e}")
                     #continue
-        return self.result_dict
+        return self.data_list
     
     def save_file(self):
         # Converter o dicionário em um DataFrame do pandas
-        df = pd.DataFrame.from_dict(self.generate_analisis(), orient='index')
+        df = pd.DataFrame(self.generate_analisis())
         # Salvar o DataFrame em um arquivo Excel
-        df.to_excel('./predictions.xlsx',  engine='xlsxwriter')
+        df.to_excel('./predictions.xlsx',index=False,engine='xlsxwriter')
         #Executar analises de preços no arquivo
         buscar_ultimo_preco = self.add_last_price()
         adicionar_analises = self.add_diferences_prediciton_add_last_price()
