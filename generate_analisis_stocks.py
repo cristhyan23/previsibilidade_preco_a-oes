@@ -18,10 +18,10 @@ class AnalisisStock(AddPriceCompare):
         super().__init__()
         self.scaler = MinMaxScaler(feature_range=(0, 1))
         self.data_list = []
-        self.look_back = 7
         sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
         self.epochs_database = 30
         self.dias_base_estudo = 5000
+        self.look_back = self.dias_base_estudo *0.8
         self.filter_params = {
     'scale_factor': 0.1,  # Fator de escala para o segundo dia
     'max_percent_change': 0.2,  # Variação percentual máxima permitida entre os preços previstos
