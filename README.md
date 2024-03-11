@@ -32,7 +32,7 @@ O projeto consiste nos seguintes componentes:
 Para utilizar este projeto:
 
 1. Garanta que todas as dependências estejam instaladas (`yfinance`, `numpy`, `tensorflow`, `keras`, `pandas`, `scikit-learn`).
-2. Execute o script `stock_price_prediction.py`.
+2. Execute o script `generate_analisis_stocks.py`.
 3. O script irá gerar previsões para as ações ou criptomoedas especificadas e salvar os resultados em um arquivo Excel com análises sobre a diferença na previsão em relação ao último preço e a diferença em relação a cada previsão 7 dias à frente, nomeado `predictions.xlsx`.
 
 ## Observação
@@ -41,4 +41,4 @@ Para utilizar este projeto:
 - A previsão de preços de ações e Cripto é inerentemente incerta e influenciada por vários fatores. Os resultados podem nem sempre ser precisos ou confiáveis.
 - É recomendável consultar especialistas financeiros antes de tomar qualquer decisão de investimento com base nas previsões geradas por este projeto.
 - Ao selecionar Cripto, a moeda será mostrada em USD; se selecionar ações, a moeda será em BRL.
-- A variavel na classe AnalisisStock chamada filter_params contem os parametros de caliberam para as previsões de 7 dias à frente focando otimizar e encontrar resultados mais alinhados a curva, os mesmos devem ser ajustados de acordo com a análise feita
+- A variável na classe AnalisisStock chamada filter_params contem os parametros de caliberam para as previsões de 7 dias à frente focando otimizar e encontrar resultados mais alinhados a curva, os mesmos devem ser ajustados de acordo com a análise feita
