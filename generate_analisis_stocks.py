@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import yfinance as yf
 import numpy as np
 from datetime import date, timedelta
@@ -22,11 +21,11 @@ class AnalisisStock(AddPriceCompare):
         self.look_back = 7
         sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
         self.epochs_database = 30
-        self.dias_base_estudo = 10000
+        self.dias_base_estudo = 5000
         self.filter_params = {
-    'scale_factor': 0.8,  # Fator de escala para o segundo dia
-    'max_percent_change': 0.3,  # Variação percentual máxima permitida entre os preços previstos
-    'adjustment_factor': 0.1  # Fator de ajuste para a previsão anterior em caso de variação percentual alta
+    'scale_factor': 0.1,  # Fator de escala para o segundo dia
+    'max_percent_change': 0.2,  # Variação percentual máxima permitida entre os preços previstos
+    'adjustment_factor': 0.05  # Fator de ajuste para a previsão anterior em caso de variação percentual alta
 }
     # Função para substituir ou remover caracteres não suportados
     def sanitize_text(self, text):
@@ -45,6 +44,14 @@ class AnalisisStock(AddPriceCompare):
             X.append(data[i:(i+look_back), :])
             Y.append(data[i + look_back, 3])  # 3 corresponde ao índice do preço de fechamento (Close)
         return np.array(X), np.array(Y)
+# A suavização exponencial atribui pesos decrescentes aos pontos de dados mais antigos, dando mais importância aos pontos de dados recentes. Isso é útil quando há uma tendência em mudança na série temporal.
+    def smooth_with_exponential_smoothing(self,data, alpha):
+        smoothed_data = [data[0]]
+        for i in range(1, len(data)):
+            smoothed_value = alpha * data[i] + (1 - alpha) * smoothed_data[-1]
+            smoothed_data.append(smoothed_value)
+        return smoothed_data
+
 
     # Função para fazer previsões
     def predict_next_week(self, model, data, days_ahead=7, filter_params=None):
@@ -56,17 +63,15 @@ class AnalisisStock(AddPriceCompare):
             
             # Inversão da escala para obter o valor não normalizado
             unscaled_prediction = self.scaler.inverse_transform([[0, 0, 0, scaled_prediction]])[0][3]
-            
-            # Aplicar fator de escala específico para o segundo dia
-            if day == 1 and filter_params:
-                unscaled_prediction *= filter_params.get('scale_factor')
-            
-            # Adicionando previsão à lista de previsões
             prediction.append(unscaled_prediction)
-            
             # Atualizando a sequência de entrada para o próximo dia
             last_sequence = np.roll(last_sequence, -1, axis=0)
             last_sequence[-1, 3] = unscaled_prediction  # Substituir o último preço de fechamento pelo previsto
+
+            # Aplicar fator de escala específico para o segundo dia
+            if day >=1:
+                smoothed_prediction = self.smooth_with_exponential_smoothing(prediction, alpha=0.2)
+                prediction =smoothed_prediction
             
             # Filtragem mais detalhada do próximo dia
             if filter_params:

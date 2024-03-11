@@ -6,10 +6,40 @@ from stockslist import Stocklist
 class AddPriceCompare(Stocklist):
     def __init__(self):
         super().__init__()
-         
+        self.df = self.read_file()
+
+    #valida se o arquivo predictions existe caso não cria um em branco
+    def read_file(self):
+        try:
+            df = pd.read_excel("./predictions.xlsx")
+            return df
+        except FileNotFoundError:
+            data_file = [{
+                        "stocks": '', 
+                        "predictions_1": '',
+                        "predictions_2": '',
+                        "predictions_3": '',
+                        "predictions_4": '',
+                        "predictions_5": '',
+                        "predictions_6": '',
+                        "predictions_7": '',
+                        "growth_index": '',
+                        "analisis r2":'',
+                        "ultimo_preco":'',
+                        "delta_ultimo_preco_vs_1_prediction":"",
+                        "delta_1_prediction_vs_2_prediction":"",
+                        "delta_2_prediction_vs_3_prediction":"",
+                        "delta_3_prediction_vs_4_prediction":"",
+                        "delta_4_prediction_vs_5_prediction":"",
+                        "delta_5_prediction_vs_6_prediction":"",
+                        "delta_6_prediction_vs_7_prediction":""
+                    }]
+            df = pd.DataFrame(data_file)
+            return df
+      
 #função responsavel por capturar as ações levantar o ultimo preço e salvar no arquivo    
     def add_last_price(self):
-        self.df = pd.read_excel("./predictions.xlsx")
+        
         stock_info = self.df["stocks"]  
         print("starting data analisis...")
         for stock in stock_info:
@@ -29,7 +59,7 @@ class AddPriceCompare(Stocklist):
 
     # Função para analisar os dados de último preço x a primeira previsão e apontar projeção de queda e aumento
     def add_diferences_prediciton_add_last_price(self):
-        self.df = pd.read_excel("./predictions.xlsx")
+        
         print("generating analisis x last price")
         stock_info = self.df["stocks"] 
         for stock in stock_info:
