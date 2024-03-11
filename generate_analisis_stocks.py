@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import yfinance as yf
 import numpy as np
 from datetime import date, timedelta
@@ -21,11 +22,11 @@ class AnalisisStock(AddPriceCompare):
         self.look_back = 7
         sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
         self.epochs_database = 30
-        self.dias_base_estudo = 5000
+        self.dias_base_estudo = 10000
         self.filter_params = {
     'scale_factor': 0.5,  # Fator de escala para o segundo dia
     'max_percent_change': 1,  # Variação percentual máxima permitida entre os preços previstos
-    'adjustment_factor': 0.03  # Fator de ajuste para a previsão anterior em caso de variação percentual alta
+    'adjustment_factor': 0.05  # Fator de ajuste para a previsão anterior em caso de variação percentual alta
 }
     # Função para substituir ou remover caracteres não suportados
     def sanitize_text(self, text):
@@ -107,6 +108,18 @@ class AnalisisStock(AddPriceCompare):
             data_features_scaled = self.scaler.fit_transform(data_features)
             X, Y = self.prepare_data(data_features_scaled, self.look_back)
             return X,Y,data_features_scaled
+    
+    #Função para remover outliers do historio de preço de fechamento das ações
+    def remove_outliers(self,data):
+        # Calcular a média e o desvio padrão dos preços de fechamento
+        mean = data['Close'].mean()
+        std_dev = data['Close'].std()
+        # Definir o limite para identificar outliers (por exemplo, 3 desvios padrão da média)
+        outlier_limit = mean + 3 * std_dev
+        # Remover outliers (valores de fechamento que excedem o limite)
+        filtered_data = data[data['Close'] < outlier_limit]
+        return filtered_data
+
     #Função que gera dados históricos das ações
     def get_stock(self,acoes):
         # Obtendo dados das ações
@@ -125,6 +138,9 @@ class AnalisisStock(AddPriceCompare):
                 data["Date"] = data.index
                 data = data[["Date", "Open", "High", "Low", "Close",
                             "Adj Close", "Volume"]]
+                # Remover outliers dos dados de fechamento
+                data = self.remove_outliers(data)
+
                 data.reset_index(drop=True, inplace=True)
                 return data
 
