@@ -24,9 +24,9 @@ class AnalisisStock(AddPriceCompare):
         self.epochs_database = 30
         self.dias_base_estudo = 10000
         self.filter_params = {
-    'scale_factor': 0.5,  # Fator de escala para o segundo dia
-    'max_percent_change': 1,  # Variação percentual máxima permitida entre os preços previstos
-    'adjustment_factor': 0.05  # Fator de ajuste para a previsão anterior em caso de variação percentual alta
+    'scale_factor': 0.8,  # Fator de escala para o segundo dia
+    'max_percent_change': 0.3,  # Variação percentual máxima permitida entre os preços previstos
+    'adjustment_factor': 0.1  # Fator de ajuste para a previsão anterior em caso de variação percentual alta
 }
     # Função para substituir ou remover caracteres não suportados
     def sanitize_text(self, text):
@@ -85,7 +85,7 @@ class AnalisisStock(AddPriceCompare):
     #função que prepara o treino e retorna o modelo
     def prepar_training_and_model(self,X,Y):
         # Dividindo os dados em treinamento e teste
-        train_size = int(len(X) * 0.8)
+        train_size = int(len(X) * 0.9)
         test_size = len(X) - train_size
         X_train, X_test = X[:train_size], X[train_size:]
         Y_train, Y_test = Y[:train_size], Y[train_size:]
