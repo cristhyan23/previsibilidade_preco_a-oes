@@ -22,8 +22,18 @@ class AnalisisStock(AddPriceCompare):
         self.epochs_database = 30
         self.dias_base_estudo = 720
         self.look_back = int(self.dias_base_estudo *0.50)
-        self.days_ahead = 7 #dias para projetar previsão
+        self.days_ahead = self.forcast_days_ahead_prediction() #dias para projetar previsão
 
+    #Função para capturar quandos dias a frente o usuário quer prever
+    def forcast_days_ahead_prediction(self):
+            numero_informado = False
+            while not numero_informado:
+                try:
+                    days_ahead = int(input("Quantos dias a frente você gostaria de prever: "))
+                    numero_informado = True
+                    return days_ahead
+                except ValueError:
+                    print("Digite somente números inteiros")
     # Função para substituir ou remover caracteres não suportados
     def sanitize_text(self, text):
         sanitized_text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
@@ -73,7 +83,7 @@ class AnalisisStock(AddPriceCompare):
             if day == days_ahead - 1:
                 # Aplicar suavização apenas se houver mais de um dia de previsão
                 if len(prediction) > 1:
-                    smoothed_prediction = self.smooth_with_exponential_smoothing(prediction[-1:], alpha=0.1)
+                    smoothed_prediction = self.smooth_with_exponential_smoothing(prediction[-1:], alpha=0.2)
                     prediction[-1] = smoothed_prediction[0]
             
         return prediction
