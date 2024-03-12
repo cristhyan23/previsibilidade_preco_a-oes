@@ -66,6 +66,7 @@ class AddPriceCompare(Stocklist):
 
         #salva o novo dataframe com os valores de previsões
         print("final file updating....")
+        df = df.drop([f'predictions_{days_ahead}',f'delta_{days_ahead-1}_prediction_vs_{days_ahead}_prediction'],axis=1)
         df.to_excel('./predictions.xlsx',index=False, engine='xlsxwriter')
 
 
