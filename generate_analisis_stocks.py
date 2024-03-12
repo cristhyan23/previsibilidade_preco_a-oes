@@ -20,13 +20,10 @@ class AnalisisStock(AddPriceCompare):
         self.data_list = []
         sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
         self.epochs_database = 30
-        self.dias_base_estudo = 5000
-        self.look_back = int(self.dias_base_estudo *0.08)
-        self.filter_params = {
-    'scale_factor': 0.1,  # Fator de escala para o segundo dia
-    'max_percent_change': 0.2,  # Variação percentual máxima permitida entre os preços previstos
-    'adjustment_factor': 0.05  # Fator de ajuste para a previsão anterior em caso de variação percentual alta
-}
+        self.dias_base_estudo = 720
+        self.look_back = int(self.dias_base_estudo *0.50)
+        self.days_ahead = 7 #dias para projetar previsão
+
     # Função para substituir ou remover caracteres não suportados
     def sanitize_text(self, text):
         sanitized_text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
@@ -52,9 +49,8 @@ class AnalisisStock(AddPriceCompare):
             smoothed_data.append(smoothed_value)
         return smoothed_data
 
-
     # Função para fazer previsões
-    def predict_next_week(self, model, data, days_ahead=7, filter_params=None):
+    def predict_next_week(self, model, data, days_ahead=7):
         prediction = []
         last_sequence = data[-days_ahead:, :]
         for day in range(days_ahead):
@@ -70,22 +66,17 @@ class AnalisisStock(AddPriceCompare):
 
             # Aplicar fator de escala específico para o segundo dia
             if day >=1:
-                smoothed_prediction = self.smooth_with_exponential_smoothing(prediction, alpha=0.2)
+                smoothed_prediction = self.smooth_with_exponential_smoothing(prediction, alpha=0.1)
                 prediction =smoothed_prediction
-            
-            # Filtragem mais detalhada do próximo dia
-            if filter_params:
-                # Verificar a variação percentual entre os preços previstos para os próximos dias
-                if day >= 2 and len(prediction) >= 2:
-                    percent_change = (prediction[day] - prediction[day - 1]) / prediction[day - 1] * 100
-                    if percent_change > filter_params.get('max_percent_change'):
-                        # Se a variação percentual for muito alta, ajustar a previsão anterior
-                        prediction[day - 1] *= 1 + filter_params.get('adjustment_factor')
-                        # Atualizar a sequência de entrada com a previsão ajustada
-                        last_sequence[day - 1, 3] = prediction[day - 1]
+
+                    # Aplicar suavização específica para o último dia de previsão
+            if day == days_ahead - 1:
+                # Aplicar suavização apenas se houver mais de um dia de previsão
+                if len(prediction) > 1:
+                    smoothed_prediction = self.smooth_with_exponential_smoothing(prediction[-1:], alpha=0.1)
+                    prediction[-1] = smoothed_prediction[0]
             
         return prediction
-
 
     #função que prepara o treino e retorna o modelo
     def prepar_training_and_model(self,X,Y):
@@ -168,8 +159,6 @@ class AnalisisStock(AddPriceCompare):
             print(f'iniciating analisis: {acoes_cleaned}')
             try:
                 data = self.get_stock(acoes)
-                # Convertendo dataframe para array numpy
-                data_array = data.values
                 # Preparando dados para LSTM
                 data_features = data[['Open', 'High', 'Low', 'Close']].values
                 X,Y,data_features_scaled = self.prepar_data_lstm(data_features)
@@ -178,23 +167,17 @@ class AnalisisStock(AddPriceCompare):
                 analisis_r2 = self.analisis_results_r2(model,X_train,Y_train)
                 # Fazendo previsões para a próxima semana
                 latest_data = data_features_scaled[-self.look_back:, :]
-                predictions = self.predict_next_week(model, latest_data,days_ahead=7,filter_params=self.filter_params)
+                predictions = self.predict_next_week(model, latest_data,days_ahead=self.days_ahead)
                 growth_index = (predictions[-1] / predictions[0] - 1) * 100
-               
                 #guarda as previsões e projeções das ações
                 print(f'saving data: {acoes_cleaned}')
+                
                 result_dict = {
-                        "stocks": acoes_cleaned, 
-                        "predictions_1": predictions[0],
-                        "predictions_2": predictions[1],
-                        "predictions_3": predictions[2],
-                        "predictions_4": predictions[3],
-                        "predictions_5": predictions[4],
-                        "predictions_6": predictions[5],
-                        "predictions_7": predictions[6],
-                        "growth_index": growth_index,
-                        "analisis r2":analisis_r2
-                    }
+                            "stocks": acoes_cleaned, 
+                            **{f"predictions_{day+1}": prediction for day, prediction in enumerate(predictions)},
+                            "growth_index": growth_index,
+                            "analisis r2":analisis_r2
+                        }
                 
                 self.data_list.append(result_dict)
 
@@ -211,7 +194,7 @@ class AnalisisStock(AddPriceCompare):
         df.to_excel('./predictions.xlsx',index=False,engine='xlsxwriter')
         #Executar analises de preços no arquivo
         buscar_ultimo_preco = self.add_last_price()
-        adicionar_analises = self.add_diferences_prediciton_add_last_price()
+        adicionar_analises = self.add_diferences_prediciton_add_last_price(self.days_ahead)
 
 
 if __name__ == "__main__":
